@@ -1,0 +1,4 @@
+{
+  "exchangeId": <EXCHANGE_ID>,
+  "presentation": <PRESENTATION_JWT>
+}
