@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />  
+    <title>Generate JWT Token</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/21.0.1/primer.css" integrity="sha512-zhCoTM+7I4D5ZoCo1Nrxc6VER+FIYsTxkaS2uK+3jf8D9ML84SBLqRNFyP6B2Cm0FCL/wcC2NMHivAjT+azXLw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="Box Box--spacious m-6">
+        <div class="Box-header">
+            <h1 class="Box-title">Generate JWT Token</h1>
+        </div>
+        <div class="Box-body" oninput="generateToken()">
+            <div class="flash flash-success f4">
+                <svg class="octicon octicon-shield-check v-align-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">  
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9275 3.55567C11.9748 3.54134 12.0252 3.54134 12.0725 3.55567L19.3225 5.75264C19.4292 5.78497 19.5 5.88157 19.5 5.99039V11C19.5 13.4031 18.7773 15.3203 17.5164 16.847C16.246 18.3853 14.3925 19.5706 12.0703 20.4278C12.0253 20.4444 11.9746 20.4444 11.9297 20.4278C9.60747 19.5706 7.75398 18.3853 6.48358 16.847C5.2227 15.3203 4.5 13.4031 4.5 11L4.5 5.9904C4.5 5.88158 4.57082 5.78496 4.6775 5.75264L11.9275 3.55567ZM12.5075 2.12013C12.1766 2.01985 11.8234 2.01985 11.4925 2.12013L4.24249 4.3171C3.50587 4.54032 3 5.21807 3 5.9904L3 11C3 13.7306 3.83104 15.9908 5.32701 17.8022C6.81347 19.6021 8.91996 20.9157 11.4102 21.835C11.7904 21.9753 12.2095 21.9753 12.5897 21.835C15.08 20.9157 17.1865 19.6021 18.673 17.8022C20.169 15.9908 21 13.7306 21 11V5.99039C21 5.21804 20.4941 4.54031 19.7575 4.3171L12.5075 2.12013ZM16.2803 9.78033C16.5732 9.48744 16.5732 9.01256 16.2803 8.71967C15.9874 8.42678 15.5126 8.42678 15.2197 8.71967L11 12.9393L9.28033 11.2197C8.98744 10.9268 8.51256 10.9268 8.21967 11.2197C7.92678 11.5126 7.92678 11.9874 8.21967 12.2803L10.4697 14.5303C10.7626 14.8232 11.2374 14.8232 11.5303 14.5303L16.2803 9.78033Z"></path>
+                </svg>
+                None of the entered data is sent to us; calculation is done using the client browser's Web Crypto API.
+            </div>
+            <div class="form-group">
+                <input class="form-control input-block input-lg" type="text" id="username" placeholder="ADMIN_USER_NAME" />
+            </div>
+            <div class="form-group" id="secret-input">
+                <input class="form-control input-block input-lg" type="text" id="secret" placeholder="SECRET" />
+            </div>
+        </div>
+        <div class="Box-footer">
+            <div class="input-group">
+                <input class="form-control color-bg-inset text-mono text-small" id="token" type="text" placeholder="SECRET must not be empty" disabled>
+                <span class="input-group-button" title="Copy to clipboard">
+                    <button type="button" class="btn" onclick="navigator.clipboard.writeText(document.getElementById('token').value).then(()=>this.style.backgroundColor='green').catch(()=>this.style.backgroundColor='red').finally(()=>this.firstElementChild.style.fill='white')" onmouseleave="this.style.backgroundColor='var(--color-btn-bg)';this.firstElementChild.style.fill='currentColor'">   
+                        <svg height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon mx-1">
+                            <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+                        </svg>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <script>
+        function generateToken() {
+            if (document.getElementById('secret').value.length == 0) {
+                document.getElementById('token').value = ''
+                document.getElementById('secret-input').classList.add('errored')
+            } else document.getElementById('secret-input').classList.remove('errored')
+            window.crypto.subtle.importKey('raw', new TextEncoder().encode(document.getElementById('secret').value), { name: "hmac", hash: "sha-256" }, false, ['sign']).then(key => {
+                data=`${btoa(JSON.stringify({typ:'JWT',alg:'HS256'}))}.${btoa(JSON.stringify({user:document.getElementById('username').value}))}`.replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_')
+                window.crypto.subtle.sign('hmac',key,new TextEncoder().encode(data)).then(e=>
+                    document.getElementById('token').value=`${data}.${btoa(String.fromCharCode(...new Uint8Array(e))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_')}`
+                )
+            })
+        }
+    </script> 
+</body>
+</html>
